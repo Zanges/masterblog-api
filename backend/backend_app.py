@@ -18,6 +18,13 @@ def get_free_id():
     return free_id
 
 
+def get_post_by_id(post_id):
+    for post in POSTS:
+        if post["id"] == post_id:
+            return post
+    return None
+
+
 @app.route('/api/posts', methods=['GET'])
 def get_posts():
     return jsonify(POSTS)
@@ -45,6 +52,17 @@ def create_post():
         POSTS.append(new_post)
         return_data, status_code = new_post, 201
     return jsonify(return_data), status_code
+
+
+@app.route('/api/posts/<int:post_id>', methods=['DELETE'])
+def delete_post(post_id):
+    post = get_post_by_id(post_id)
+    if post:
+        POSTS.remove(post)
+        return jsonify({
+            "message": f"Post with id {post_id} has been deleted successfully."
+        }), 200
+    return jsonify({"error": "Post not found"}), 404
 
 
 if __name__ == '__main__':
