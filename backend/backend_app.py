@@ -29,7 +29,18 @@ def get_post_by_id(post_id):
 
 @app.route('/api/posts', methods=['GET'])
 def get_posts():
-    return jsonify(POSTS)
+    sort_param = request.args.get("sort")
+    direction_param = request.args.get("direction")
+    if sort_param:
+        if direction_param not in ["asc", "desc"]:
+            return jsonify({"error": "Invalid 'direction' query parameter"}), 400
+        if sort_param == "title":
+            POSTS.sort(key=lambda post: post["title"], reverse=(direction_param == "desc"))
+        elif sort_param == "content":
+            POSTS.sort(key=lambda post: post["content"], reverse=(direction_param == "desc"))
+        else:
+            return jsonify({"error": "Invalid 'sort' query parameter"}), 400
+    return jsonify(POSTS), 200
 
 
 @app.route('/api/posts', methods=['POST'])
