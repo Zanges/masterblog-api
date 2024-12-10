@@ -11,6 +11,7 @@ POSTS = [
 
 
 def get_free_id():
+    """Return the first free id in the POSTS list."""
     free_id = 1
     used_ids = [post["id"] for post in POSTS]
     while free_id in used_ids:
@@ -19,6 +20,7 @@ def get_free_id():
 
 
 def get_post_by_id(post_id):
+    """Return the post with the given id."""
     for post in POSTS:
         if post["id"] == post_id:
             return post
@@ -77,6 +79,30 @@ def update_post(post_id):
     if "content" in data:
         post["content"] = data["content"]
     return jsonify(post), 200
+
+
+@app.route('/api/posts/search', methods=['GET'])
+def search_posts():
+    search_query = request.args
+    title_query = search_query.get("title")
+    content_query = search_query.get("content")
+    if title_query or content_query:
+        result = []
+        for post in POSTS:
+            # If both title and content are provided, we will search for posts that match both
+            if title_query and content_query:
+                if title_query.lower() in post["title"].lower() and content_query.lower() in post["content"].lower():
+                    result.append(post)
+            # If only title is provided, we will search for posts that match the title
+            elif title_query:
+                if title_query.lower() in post["title"].lower():
+                    result.append(post)
+            # If only content is provided, we will search for posts that match the content
+            elif content_query:
+                if content_query.lower() in post["content"].lower():
+                    result.append(post)
+        return jsonify(list(result)), 200
+    return jsonify({"error": "'title' or 'content' query parameter is required"}), 400
 
 
 if __name__ == '__main__':
